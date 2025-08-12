@@ -3,79 +3,63 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Image Text Box Overlay</title>
+  <title>Image Text Box Overlay — Simple UX</title>
   <style>
     :root {
-      --accent: #0f766e;
-      --muted: #e5e7eb;
       --bg: #0b1220;
-      --panel: #111827;
-      --text: #eaeef7;
+      --panel: #0f172a;
+      --ink: #eaeef7;
+      --muted: #1f2937;
+      --accent: #67e8f9;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
-    body {
-      margin: 0; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji";
-      color: var(--text); background: linear-gradient(180deg, #0b1220, #0a0f1a);
-    }
-    header { padding: 18px 16px; border-bottom: 1px solid #1f2937; position: sticky; top: 0; backdrop-filter: blur(6px); background: color-mix(in srgb, var(--bg) 92%, transparent); z-index: 10; }
+    body { margin: 0; font: 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--ink); background: radial-gradient(1200px 800px at 20% 0%, #0e1528 0%, #0a0f1a 40%, #090d16 100%); }
+    header { padding: 16px; border-bottom: 1px solid #1f2937; position: sticky; top: 0; backdrop-filter: blur(6px); background: color-mix(in srgb, #0b1220 92%, transparent); z-index: 5; }
     header h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: .2px; }
 
-    .wrap { max-width: 1100px; margin: 18px auto; padding: 0 16px 40px; display: grid; grid-template-columns: 1fr 340px; gap: 18px; }
+    .wrap { max-width: 1100px; margin: 16px auto 28px; padding: 0 16px; display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
     @media (max-width: 980px) { .wrap { grid-template-columns: 1fr; } }
 
     .panel { background: var(--panel); border: 1px solid #1f2937; border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
 
-    /* Canvas stage */
-    .stage { position: relative; min-height: 320px; display: grid; place-items: center; overflow: hidden; }
-    canvas { max-width: 100%; height: auto; display: block; background: #0b1020; }
+    /* Stage */
+    .stage { position: relative; display: grid; place-items: center; min-height: 340px; overflow: hidden; }
+    canvas { max-width: 100%; height: auto; display: block; background: #0b1020; cursor: crosshair; }
 
-    /* Dropzone overlay */
-    .dropzone { position: absolute; inset: 0; display: grid; place-items: center; border: 2px dashed #374151; border-radius: 14px; color: #a5b4fc; padding: 28px; text-align: center; pointer-events: auto; }
-    .dropzone.hide { display: none; }
-    .dropzone.dragover { border-color: #67e8f9; background: rgba(103,232,249,.08); }
-    .dropzone strong { color: #e5e7eb; }
+    .dz { position: absolute; inset: 0; display: grid; place-items: center; border: 2px dashed #374151; border-radius: 14px; color: #a5b4fc; padding: 28px; text-align: center; }
+    .dz.hide { display: none; }
+    .dz.dragover { border-color: var(--accent); background: rgba(103,232,249,.08); }
 
     /* Controls */
     .controls { padding: 14px; display: grid; gap: 12px; }
-    .group { border-top: 1px dashed #263244; padding-top: 12px; }
-    .controls h3 { margin: 8px 0; font-size: 13px; text-transform: uppercase; letter-spacing: .12em; opacity: .8; }
+    .controls h3 { margin: 6px 0 2px; font-size: 13px; text-transform: uppercase; letter-spacing: .12em; opacity: .85; }
 
-    label { display: grid; gap: 6px; margin: 6px 0; font-size: 13px; }
-    input[type="number"], input[type="text"], textarea, input[type="file"] {
-      width: 100%; padding: 10px 12px; border-radius: 9px; border: 1px solid #2a3649; background: #0b1220; color: var(--text);
-    }
-    textarea { min-height: 96px; resize: vertical; }
-    input[type="range"] { width: 100%; }
-
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-
+    label { display: grid; gap: 6px; font-size: 13px; }
+    input[type="file"], textarea, input[type="number"] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #263244; background: #0b1220; color: var(--ink); }
+    textarea { min-height: 110px; resize: vertical; }
     .btns { display: flex; gap: 10px; flex-wrap: wrap; }
-    button { cursor: pointer; padding: 10px 14px; border-radius: 10px; border: 1px solid #2a3649; background: #0e1728; color: var(--text); }
+    button { cursor: pointer; padding: 10px 14px; border-radius: 10px; border: 1px solid #2a3649; background: #0e1728; color: var(--ink); }
     button.primary { border-color: #115e59; background: #0b2b29; box-shadow: inset 0 0 0 1px #134e4a; }
-    button:active { transform: translateY(1px); }
-
-    .hint { font-size: 12px; opacity: .8; }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; background: #0b1220; border: 1px solid #2a3649; padding: 1px 6px; border-radius: 6px; }
-
+    .hint { font-size: 12px; opacity: .85; }
     .pill { font-size: 12px; border: 1px solid #2a3649; padding: 4px 8px; border-radius: 999px; opacity: .9; }
+
     footer { text-align: center; opacity: .7; font-size: 12px; padding: 10px; }
   </style>
 </head>
 <body>
   <header>
-    <h1>Image Text Box Overlay <span class="pill">#F6FF00 @ 17.5% opacity</span></h1>
+    <h1>Image Text Box Overlay <span class="pill">Drag to draw • Drag handles to resize • Drag inside to move</span></h1>
   </header>
 
   <div class="wrap">
     <!-- Canvas / Stage -->
     <section class="panel stage" id="stage">
       <canvas id="canvas" width="1200" height="800" aria-label="Canvas preview" role="img"></canvas>
-      <div id="dropzone" class="dropzone" aria-label="Dropzone" tabindex="0">
+      <div id="dropzone" class="dz" aria-label="Dropzone" tabindex="0">
         <div>
-          <p><strong>Drag &amp; drop</strong> an image here, <strong>paste</strong> it (⌘/Ctrl+V), or <strong>upload</strong> below.</p>
-          <p class="hint">TIP: Draw a bounding box by click‑dragging on the canvas. Press <span class="kbd">R</span> to reset the box.</p>
+          <p><strong>Drag & drop</strong> an image here, <strong>paste</strong> it (⌘/Ctrl+V), or <strong>upload</strong> at right.</p>
+          <p class="hint">Then: click‑drag to draw a box, drag handles to resize, or drag inside to move.</p>
         </div>
       </div>
     </section>
@@ -83,444 +67,403 @@
     <!-- Controls -->
     <aside class="panel">
       <div class="controls">
-        <div class="group">
+        <div>
           <h3>1) Load image</h3>
           <label>
             <span>Upload image file</span>
             <input type="file" id="fileInput" accept="image/*" />
           </label>
-          <div class="hint">You can also paste (⌘/Ctrl+V) or drop an image file anywhere on this page.</div>
+          <div class="hint">You can also paste (⌘/Ctrl+V) or drop an image anywhere on the page.</div>
         </div>
 
-        <div class="group">
-          <h3>2) Enter text</h3>
+        <div>
+          <h3>2) Type your text</h3>
           <label>
             <span>Overlay text</span>
-            <textarea id="overlayText" placeholder="Type your text..."></textarea>
+            <textarea id="overlayText" placeholder="Type your text…"></textarea>
           </label>
-          <div class="row">
-            <label>
-              <span>Font size (px)</span>
-              <input type="number" id="fontSize" min="6" max="400" step="1" value="48" />
-            </label>
-            <label>
-              <span>Line height (em)</span>
-              <input type="number" id="lineHeight" min="0.8" max="3" step="0.05" value="1.25" />
-            </label>
-          </div>
           <label>
-            <span>Font family</span>
-            <input type="text" id="fontFamily" value="Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif" />
+            <span>Font size (px)</span>
+            <input type="number" id="fontSize" min="6" max="400" step="1" value="48" />
           </label>
+          <div class="hint">Text is fixed to <strong>#F6FF00</strong> at <strong>17.5% opacity</strong> and will be clipped inside the box.</div>
         </div>
 
-        <div class="group">
-          <h3>3) Define bounding box</h3>
-          <div class="hint">Click‑drag on the canvas to draw a box. Or adjust numerically below.</div>
-          <div class="row3">
-            <label>
-              <span>X</span>
-              <input type="number" id="boxX" value="120" />
-            </label>
-            <label>
-              <span>Y</span>
-              <input type="number" id="boxY" value="120" />
-            </label>
-            <label>
-              <span>Width</span>
-              <input type="number" id="boxW" value="600" />
-            </label>
-          </div>
-          <div class="row">
-            <label>
-              <span>Height</span>
-              <input type="number" id="boxH" value="300" />
-            </label>
-            <div style="display:grid;align-content:end;">
-              <div class="btns">
-                <button id="centerBox">Center box</button>
-                <button id="resetBox" title="Set a default box">Reset box</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="group">
-          <h3>4) Export</h3>
+        <div>
+          <h3>3) Export</h3>
           <div class="btns">
-            <button class="primary" id="downloadBtn">Render &amp; Download PNG</button>
-            <button id="copyBtn" title="Copies the rendered image">Copy to clipboard</button>
+            <button class="primary" id="downloadBtn">Render & Download PNG</button>
+            <button id="copyBtn">Copy to clipboard</button>
+            <button id="resetBox">Reset box</button>
+            <button id="centerBox">Center box</button>
           </div>
-          <div class="hint">Text is rendered in <strong>#F6FF00</strong> at <strong>17.5% opacity</strong> within the box (clipped). The dashed outline is preview‑only and not included in the download.</div>
+          <div class="hint">No coordinates to type — the box is set by direct drag & drop on the image.</div>
         </div>
       </div>
     </aside>
   </div>
 
-  <footer>
-    Works fully offline and can be hosted statically (e.g., GitHub Pages). No uploads or tracking.
-  </footer>
+  <footer>Static, privacy‑friendly. Works offline and on GitHub Pages.</footer>
 
   <script>
-    (function() {
+    (function(){
       'use strict';
 
-      // ---------- Constants ----------
+      // ===== Config =====
       const OPACITY = 0.175; // 17.5%
       const TEXT_HEX = '#F6FF00';
       const DPR = window.devicePixelRatio || 1;
+      console.log('[init] config', { OPACITY, TEXT_HEX, DPR });
 
-      // ---------- Elements ----------
+      // ===== Elements =====
+      const stage = document.getElementById('stage');
       const canvas = document.getElementById('canvas');
       const ctx = canvas.getContext('2d');
-      const stage = document.getElementById('stage');
       const dropzone = document.getElementById('dropzone');
-      const fileInput = document.getElementById('fileInput');
 
+      const fileInput = document.getElementById('fileInput');
       const overlayText = document.getElementById('overlayText');
       const fontSizeEl = document.getElementById('fontSize');
-      const lineHeightEl = document.getElementById('lineHeight');
-      const fontFamilyEl = document.getElementById('fontFamily');
 
-      const boxXEl = document.getElementById('boxX');
-      const boxYEl = document.getElementById('boxY');
-      const boxWEl = document.getElementById('boxW');
-      const boxHEl = document.getElementById('boxH');
-
-      const centerBoxBtn = document.getElementById('centerBox');
-      const resetBoxBtn = document.getElementById('resetBox');
       const downloadBtn = document.getElementById('downloadBtn');
       const copyBtn = document.getElementById('copyBtn');
+      const resetBtn = document.getElementById('resetBox');
+      const centerBtn = document.getElementById('centerBox');
 
-      // ---------- State ----------
+      // ===== State (box coords are in CANVAS CSS pixels) =====
       const state = {
-        image: null, // HTMLImageElement
-        imgW: 1200, imgH: 800, // intrinsic image size
+        img: null, imgW: 1200, imgH: 800,
+        canW: 1200, canH: 800, // canvas CSS size
+        scale: 1, // CSS pixels per image pixel (<=1)
         box: { x: 120, y: 120, w: 600, h: 300 },
-        isDrawing: false,
-        drawStart: { x: 0, y: 0 },
+        action: null, // 'draw' | 'move' | 'resize' | null
+        resizeHandle: null, // 'nw','n','ne','e','se','s','sw','w'
+        start: { x: 0, y: 0, bx: 0, by: 0, bw: 0, bh: 0 },
       };
+      console.log('[init] initial state', JSON.parse(JSON.stringify(state)));
 
-      // ---------- Helpers ----------
+      // ===== Helpers =====
       function parseHexToRgb(hex) {
         const m = /^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i.exec(hex);
         if (!m) return { r: 246, g: 255, b: 0 };
         return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
       }
-
-      function setCanvasSize(width, height) {
-        // Internal pixel size
-        canvas.width = Math.round(width * DPR);
-        canvas.height = Math.round(height * DPR);
-        // CSS size
-        canvas.style.width = width + 'px';
-        canvas.style.height = height + 'px';
-        ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // scale drawing to CSS pixels
+      function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+      function setCanvasCSSSize(w, h) {
+        console.log('[setCanvasCSSSize] ->', { w, h, DPR });
+        // Set internal pixel size (account for DPR)
+        canvas.width = Math.round(w * DPR);
+        canvas.height = Math.round(h * DPR);
+        // Set CSS size
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        state.canW = w; state.canH = h;
+        console.log('[setCanvasCSSSize] applied', { canW: state.canW, canH: state.canH });
       }
-
       function fitStageToImage() {
-        // Keep a max CSS width equal to container width, preserve aspect ratio
-        const containerWidth = stage.clientWidth - 24; // padding allowance
-        const containerHeight = Math.max(320, window.innerHeight * 0.4);
-        const scale = Math.min(containerWidth / state.imgW, containerHeight / state.imgH, 1);
-        setCanvasSize(Math.round(state.imgW * scale), Math.round(state.imgH * scale));
+        const cw = Math.max(320, stage.clientWidth - 24);
+        const ch = Math.max(340, Math.floor(window.innerHeight * 0.5));
+        const scale = Math.min(cw / state.imgW, ch / state.imgH, 1);
+        const w = Math.round(state.imgW * scale);
+        const h = Math.round(state.imgH * scale);
+        state.scale = scale;
+        console.log('[fitStageToImage]', { cw, ch, imgW: state.imgW, imgH: state.imgH, scale, w, h });
+        setCanvasCSSSize(w, h);
+      }
+      function setDefaultBox() {
+        const m = Math.round(Math.min(state.canW, state.canH) * 0.08);
+        state.box = { x: m, y: m, w: Math.max(180, state.canW - m * 2), h: Math.max(120, Math.round(state.canH * 0.28)) };
+        console.log('[setDefaultBox]', JSON.parse(JSON.stringify(state.box)));
+        render(false);
+      }
+      function centerBox() {
+        const { w, h } = state.box;
+        state.box.x = Math.round((state.canW - w) / 2);
+        state.box.y = Math.round((state.canH - h) / 2);
+        console.log('[centerBox]', JSON.parse(JSON.stringify(state.box)));
+        render(false);
       }
 
+      // ===== Drawing =====
+      function clear() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+      function drawChecker() {
+        const size = 16;
+        for (let y = 0; y < state.canH; y += size) {
+          for (let x = 0; x < state.canW; x += size) {
+            ctx.fillStyle = ((x/size + y/size) % 2) ? '#0b1220' : '#0e1627';
+            ctx.fillRect(x, y, size, size);
+          }
+        }
+      }
+      function drawImage() {
+        if (!state.img) { /* console.log('[drawImage] no image loaded yet'); */ drawChecker(); return; }
+        ctx.drawImage(state.img, 0, 0, state.imgW, state.imgH, 0, 0, state.canW, state.canH);
+      }
+      function drawPreviewBox() {
+        const { x, y, w, h } = state.box;
+        ctx.save();
+        ctx.setLineDash([8,8]);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(103,232,249,.95)';
+        ctx.strokeRect(x + 0.5, y + 0.5, w, h);
+        // Handles
+        const handles = getHandleRects();
+        ctx.setLineDash([]);
+        for (const r of handles) {
+          ctx.fillStyle = '#0ea5e9';
+          ctx.fillRect(r.x, r.y, r.s, r.s);
+          ctx.strokeStyle = '#022c3a';
+          ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.s, r.s);
+        }
+        ctx.restore();
+      }
+      function render(finalExport) {
+        // Note: will log frequently during interactions
+        console.log('[render]', { finalExport, box: JSON.parse(JSON.stringify(state.box)), canW: state.canW, canH: state.canH });
+        clear();
+        drawImage();
+        if (!finalExport) drawPreviewBox();
+        drawTextIntoBox(ctx, state.box, state.canW, state.canH, +fontSizeEl.value || 48, !finalExport);
+      }
+
+      // Text rendering (wrapping) in the current context
+      function drawTextIntoBox(context, box, canvasW, canvasH, fontSizeCssPx, preview) {
+        const text = overlayText.value || '';
+        if (!text) { /* console.log('[drawTextIntoBox] empty text'); */ return; }
+        const { r, g, b } = parseHexToRgb(TEXT_HEX);
+        const lhEm = 1.25; // keep simple
+        const lineH = fontSizeCssPx * lhEm;
+
+        context.save();
+        context.beginPath(); context.rect(box.x, box.y, box.w, box.h); context.clip();
+        context.font = `${fontSizeCssPx}px system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif`;
+        context.textBaseline = 'top';
+        context.textAlign = 'left';
+
+        const lines = wrapText(context, text, box.w);
+
+        // Preview-only highlight to improve legibility while placing text
+        if (preview) {
+          const maxLines = Math.max(1, Math.floor(box.h / lineH));
+          const visibleLines = Math.min(lines.length, maxLines);
+          const highlightH = Math.min(box.h, visibleLines * lineH);
+          context.fillStyle = 'rgba(0,0,0,0.35)';
+          context.fillRect(box.x, box.y, box.w, highlightH);
+          context.shadowColor = 'rgba(0,0,0,0.6)';
+          context.shadowBlur = 4;
+        } else {
+          context.shadowColor = 'transparent';
+          context.shadowBlur = 0;
+        }
+
+        // Actual text fill style (always the same color/opacity)
+        context.fillStyle = `rgba(${r}, ${g}, ${b}, ${OPACITY})`;
+        console.log('[drawTextIntoBox] lines', { count: lines.length, fontSizeCssPx, box: JSON.parse(JSON.stringify(box)), preview });
+        let y = box.y;
+        for (const ln of lines) {
+          if (y + lineH > box.y + box.h + 0.5) break;
+          context.fillText(ln, box.x, Math.round(y) + 0.5);
+          y += lineH;
+        }
+        context.restore();
+      }
+      function wrapText(context, text, maxWidth) {
+        const words = text.replace(/\n/g, ' \n ').split(/\s+/);
+        const lines = []; let line = '';
+        for (const word of words) {
+          if (word === '\\n') { lines.push(line.trim()); line = ''; continue; }
+          const test = line ? line + ' ' + word : word;
+          if (context.measureText(test).width <= maxWidth) line = test;
+          else {
+            if (!line) { // single long word
+              let cur = '';
+              for (const ch of word) {
+                const tryS = cur + ch;
+                if (context.measureText(tryS).width <= maxWidth) cur = tryS; else { lines.push(cur); cur = ch; }
+              }
+              line = cur;
+            } else { lines.push(line.trim()); line = word; }
+          }
+        }
+        if (line) lines.push(line.trim());
+        // Potentially verbose: summarize only
+        // console.log('[wrapText] result', { lines });
+        console.log('[wrapText] result count', lines.length);
+        return lines;
+      }
+
+      // ===== Pointer interactions (draw / move / resize) =====
+      const HANDLE_SIZE = 10; // CSS px
+      function getHandleRects() {
+        const { x, y, w, h } = state.box; const s = HANDLE_SIZE;
+        const midX = x + w/2, midY = y + h/2;
+        return [
+          {key:'nw', x:x-s/2, y:y-s/2, s},
+          {key:'n',  x:midX-s/2, y:y-s/2, s},
+          {key:'ne', x:x+w-s/2, y:y-s/2, s},
+          {key:'e',  x:x+w-s/2, y:midY-s/2, s},
+          {key:'se', x:x+w-s/2, y:y+h-s/2, s},
+          {key:'s',  x:midX-s/2, y:y+h-s/2, s},
+          {key:'sw', x:x-s/2, y:y+h-s/2, s},
+          {key:'w',  x:x-s/2, y:midY-s/2, s},
+        ];
+      }
+      function pointInRect(px, py, r) { return px >= r.x && px <= r.x + r.s && py >= r.y && py <= r.y + r.s; }
+      function hitTestHandles(px, py) {
+        const rects = getHandleRects();
+        for (const r of rects) { if (pointInRect(px, py, r)) return r.key; }
+        return null;
+      }
+      function pointInBox(px, py) {
+        const { x, y, w, h } = state.box;
+        return px >= x && px <= x + w && py >= y && py <= y + h;
+      }
+      function setCursor(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left, y = e.clientY - rect.top;
+        const h = hitTestHandles(x, y);
+        let cur = 'crosshair';
+        if (h) {
+          cur = (h==='n'||h==='s') ? 'ns-resize' : (h==='e'||h==='w') ? 'ew-resize' : (h==='ne'||h==='sw') ? 'nesw-resize' : 'nwse-resize';
+        } else if (pointInBox(x, y)) cur = 'move';
+        canvas.style.cursor = cur;
+        // Comment out if too noisy:
+        // console.log('[cursor]', { x, y, handle: h, cursor: cur });
+      }
+
+      canvas.addEventListener('pointerdown', (e) => {
+        if (!state.img) return;
+        canvas.setPointerCapture(e.pointerId);
+        const rect = canvas.getBoundingClientRect();
+        const x = clamp(e.clientX - rect.left, 0, state.canW);
+        const y = clamp(e.clientY - rect.top, 0, state.canH);
+        const handle = hitTestHandles(x, y);
+        state.start = { x, y, bx: state.box.x, by: state.box.y, bw: state.box.w, bh: state.box.h };
+        if (handle) { state.action = 'resize'; state.resizeHandle = handle; }
+        else if (pointInBox(x, y)) { state.action = 'move'; }
+        else { state.action = 'draw'; state.box = { x, y, w: 0, h: 0 }; }
+        console.log('[pointerdown]', { x, y, action: state.action, handle });
+        render(false);
+      });
+      canvas.addEventListener('pointermove', (e) => {
+        setCursor(e);
+        if (!state.img || !state.action) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = clamp(e.clientX - rect.left, 0, state.canW);
+        const y = clamp(e.clientY - rect.top, 0, state.canH);
+        const dx = x - state.start.x; const dy = y - state.start.y;
+
+        if (state.action === 'draw') {
+          const bx = Math.min(state.start.x, x);
+          const by = Math.min(state.start.y, y);
+          const bw = Math.abs(dx); const bh = Math.abs(dy);
+          state.box = { x: bx, y: by, w: bw, h: bh };
+        } else if (state.action === 'move') {
+          let nx = state.start.bx + dx; let ny = state.start.by + dy;
+          nx = clamp(nx, 0, state.canW - state.start.bw);
+          ny = clamp(ny, 0, state.canH - state.start.bh);
+          state.box.x = nx; state.box.y = ny;
+        } else if (state.action === 'resize') {
+          resizeFromHandle(x, y);
+        }
+        // Comment out if too noisy:
+        // console.log('[pointermove]', { x, y, action: state.action, box: JSON.parse(JSON.stringify(state.box)) });
+        render(false);
+      });
+      canvas.addEventListener('pointerup', (e) => {
+        state.action = null; state.resizeHandle = null; canvas.releasePointerCapture(e.pointerId);
+        console.log('[pointerup]');
+      });
+
+      function resizeFromHandle(mx, my) {
+        const h = state.resizeHandle; if (!h) return;
+        let { bx, by, bw, bh } = state.start;
+        let x = bx, y = by, w = bw, hgt = bh;
+        const min = 10;
+        if (h.includes('w')) { const nx = clamp(mx, 0, bx + bw - min); w = bx + bw - nx; x = nx; }
+        if (h.includes('e')) { const nx = clamp(mx, bx + min, state.canW); w = nx - bx; }
+        if (h.includes('n')) { const ny = clamp(my, 0, by + bh - min); hgt = by + bh - ny; y = ny; }
+        if (h.includes('s')) { const ny = clamp(my, by + min, state.canH); hgt = ny - by; }
+        state.box = { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(hgt) };
+        console.log('[resizeFromHandle]', { handle: h, box: JSON.parse(JSON.stringify(state.box)) });
+      }
+
+      // ===== Image I/O =====
       function loadImageFromFile(file) {
         if (!file || !file.type.startsWith('image/')) return;
+        console.log('[loadImageFromFile] start', { name: file && file.name, type: file && file.type, size: file && file.size });
         const reader = new FileReader();
         reader.onload = () => {
+          console.log('[FileReader.onload] bytes', reader.result && reader.result.length);
           const img = new Image();
           img.onload = () => {
-            state.image = img;
-            state.imgW = img.naturalWidth;
-            state.imgH = img.naturalHeight;
-            fitStageToImage();
-            setDefaultBox();
-            render(false);
-            dropzone.classList.add('hide');
+            state.img = img; state.imgW = img.naturalWidth; state.imgH = img.naturalHeight;
+            console.log('[Image.onload] dimensions', { imgW: state.imgW, imgH: state.imgH });
+            fitStageToImage(); setDefaultBox(); dropzone.classList.add('hide'); render(false);
           };
           img.src = reader.result;
         };
         reader.readAsDataURL(file);
       }
 
-      function setDefaultBox() {
-        const margin = Math.round(Math.min(state.imgW, state.imgH) * 0.08);
-        state.box.x = margin;
-        state.box.y = margin;
-        state.box.w = Math.max(200, state.imgW - margin * 2);
-        state.box.h = Math.max(120, Math.round(state.imgH * 0.28));
-        syncBoxInputs();
-      }
-
-      function centerBox() {
-        state.box.x = Math.round((state.imgW - state.box.w) / 2);
-        state.box.y = Math.round((state.imgH - state.box.h) / 2);
-        syncBoxInputs();
-        render(false);
-      }
-
-      function syncBoxInputs() {
-        boxXEl.value = Math.round(state.box.x);
-        boxYEl.value = Math.round(state.box.y);
-        boxWEl.value = Math.round(state.box.w);
-        boxHEl.value = Math.round(state.box.h);
-      }
-
-      function updateBoxFromInputs() {
-        state.box.x = clamp(+boxXEl.value || 0, 0, state.imgW);
-        state.box.y = clamp(+boxYEl.value || 0, 0, state.imgH);
-        state.box.w = clamp(+boxWEl.value || 0, 0, state.imgW - state.box.x);
-        state.box.h = clamp(+boxHEl.value || 0, 0, state.imgH - state.box.y);
-        render(false);
-      }
-
-      function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
-
-      function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-      function drawImage() {
-        if (!state.image) {
-          // Blank checkerboard background
-          const size = 16;
-          for (let y = 0; y < canvas.height / DPR; y += size) {
-            for (let x = 0; x < canvas.width / DPR; x += size) {
-              ctx.fillStyle = ((x/size + y/size) % 2) ? '#0b1220' : '#0e1627';
-              ctx.fillRect(x, y, size, size);
-            }
-          }
-          return;
-        }
-        ctx.drawImage(state.image, 0, 0, state.imgW, state.imgH, 0, 0, canvas.width / DPR, canvas.height / DPR);
-      }
-
-      function drawPreviewBox() {
-        const { x, y, w, h } = scaledBox();
-        ctx.save();
-        ctx.setLineDash([8, 8]);
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = 'rgba(103,232,249,.95)';
-        ctx.strokeRect(x, y, w, h);
-        ctx.restore();
-      }
-
-      function scaledBox() {
-        // Canvas is already scaled to CSS pixels. Box uses image-space coordinates.
-        return { x: state.box.x, y: state.box.y, w: state.box.w, h: state.box.h };
-      }
-
-      function render(finalExport) {
-        clearCanvas();
-        drawImage();
-        if (!finalExport) drawPreviewBox();
-        drawTextIntoBox();
-      }
-
-      function drawTextIntoBox() {
-        const text = overlayText.value || '';
-        if (!text) return;
-        const fontSize = clamp(+fontSizeEl.value || 48, 6, 400);
-        const lhEm = clamp(+lineHeightEl.value || 1.25, 0.8, 3);
-        const family = fontFamilyEl.value || 'system-ui, sans-serif';
-        const { x, y, w, h } = scaledBox();
-
-        ctx.save();
-        // Clip to the bounding box
-        ctx.beginPath();
-        ctx.rect(x, y, w, h);
-        ctx.clip();
-
-        ctx.font = `${fontSize}px ${family}`;
-        ctx.textBaseline = 'top';
-        ctx.textAlign = 'left';
-
-        // Fill style with requested color & opacity
-        const { r, g, b } = parseHexToRgb(TEXT_HEX);
-        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${OPACITY})`;
-
-        const lineHeightPx = fontSize * lhEm;
-        const lines = wrapText(ctx, text, w);
-
-        let cursorY = y;
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (cursorY + lineHeightPx > y + h + 0.5) break; // avoid drawing beyond box
-          ctx.fillText(line, x, Math.round(cursorY) + 0.5);
-          cursorY += lineHeightPx;
-        }
-
-        ctx.restore();
-      }
-
-      function wrapText(context, text, maxWidth) {
-        const words = text.replace(/\n/g, ' \n ').split(/\s+/);
-        const lines = [];
-        let line = '';
-        const space = ' ';
-
-        function pushLine() { lines.push(line.trim()); line = ''; }
-
-        for (let i = 0; i < words.length; i++) {
-          const word = words[i];
-          if (word === '\\n') { pushLine(); continue; }
-          const test = line ? line + space + word : word;
-          const w = context.measureText(test).width;
-          if (w <= maxWidth) {
-            line = test;
-          } else {
-            if (!line) {
-              // Word longer than maxWidth: hard-break
-              let cur = '';
-              for (const ch of word) {
-                const attempt = cur + ch;
-                if (context.measureText(attempt).width <= maxWidth) {
-                  cur = attempt;
-                } else {
-                  lines.push(cur);
-                  cur = ch;
-                }
-              }
-              line = cur;
-            } else {
-              pushLine();
-              line = word;
-            }
-          }
-        }
-        if (line) pushLine();
-        return lines;
-      }
-
-      function downloadPNG() {
-        if (!state.image) { alert('Please load an image first.'); return; }
-        // Re-render cleanly (no dashed box) at full current canvas size
-        render(true);
-        const link = document.createElement('a');
-        link.download = 'image-with-text.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        // Restore preview after export
-        render(false);
-      }
-
-      async function copyToClipboard() {
-        if (!state.image) { alert('Please load an image first.'); return; }
-        render(true);
-        try {
-          canvas.toBlob(async (blob) => {
-            if (!blob) return;
-            const item = new ClipboardItem({ 'image/png': blob });
-            await navigator.clipboard.write([item]);
-            alert('Rendered image copied to clipboard.');
-            render(false);
-          }, 'image/png');
-        } catch (e) {
-          console.error(e);
-          alert('Copy failed in this browser. You can still download as PNG.');
-          render(false);
-        }
-      }
-
-      // ---------- Events ----------
-      // File upload
-      fileInput.addEventListener('change', (e) => {
-        const f = e.target.files && e.target.files[0];
-        if (f) loadImageFromFile(f);
-      });
-
-      // Paste image from clipboard
+      // Paste
       window.addEventListener('paste', (e) => {
-        const items = e.clipboardData && e.clipboardData.items;
-        if (!items) return;
+        const items = e.clipboardData && e.clipboardData.items; if (!items) return;
         for (const it of items) {
-          if (it.kind === 'file' && it.type.startsWith('image/')) {
-            loadImageFromFile(it.getAsFile());
-            e.preventDefault();
-            break;
-          }
+          if (it.kind === 'file' && it.type.startsWith('image/')) { console.log('[paste] image found', it.type); loadImageFromFile(it.getAsFile()); e.preventDefault(); break; }
         }
       });
-
-      // Drag & drop image files
-      ['dragenter','dragover'].forEach(type => {
-        window.addEventListener(type, (e) => {
-          e.preventDefault(); e.stopPropagation();
-          dropzone.classList.add('dragover');
-        });
-      });
-      ['dragleave','drop'].forEach(type => {
-        window.addEventListener(type, (e) => {
-          e.preventDefault(); e.stopPropagation();
-          dropzone.classList.remove('dragover');
-        });
-      });
+      // Drag & drop
+      ['dragenter','dragover'].forEach(t => window.addEventListener(t, (e)=>{ e.preventDefault(); dropzone.classList.add('dragover'); console.log('[dnd]', t); }));
+      ['dragleave','drop'].forEach(t => window.addEventListener(t, (e)=>{ e.preventDefault(); dropzone.classList.remove('dragover'); console.log('[dnd]', t); }));
       window.addEventListener('drop', (e) => {
-        const dt = e.dataTransfer;
-        if (!dt) return;
-        if (dt.files && dt.files.length) {
-          const imgFile = Array.from(dt.files).find(f => f.type.startsWith('image/'));
-          if (imgFile) loadImageFromFile(imgFile);
-        } else if (dt.items) {
-          // Ignore external URLs to avoid cross-origin tainting on export.
-          alert('Please drop an image file (not a web link).');
-        }
+        const dt = e.dataTransfer; if (!dt) return;
+        if (dt.files && dt.files.length) { const f = Array.from(dt.files).find(f=>f.type.startsWith('image/')); console.log('[drop] files', dt.files.length, 'chosen', !!f); if (f) loadImageFromFile(f); }
+        else if (dt.items) { console.warn('[drop] non-file item dropped'); alert('Please drop an image file (not a web link).'); }
       });
+      // File input
+      fileInput.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; console.log('[fileInput.change]', f && { name: f.name, type: f.type, size: f.size }); if (f) loadImageFromFile(f); });
 
-      // Canvas interactions: draw bounding box by dragging
-      canvas.addEventListener('mousedown', (e) => {
-        if (!state.image) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left);
-        const y = (e.clientY - rect.top);
-        state.isDrawing = true;
-        state.drawStart = { x, y };
-        state.box = { x, y, w: 0, h: 0 };
-        syncBoxInputs();
-      });
-      window.addEventListener('mousemove', (e) => {
-        if (!state.isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = clamp(e.clientX - rect.left, 0, canvas.width / DPR);
-        const y = clamp(e.clientY - rect.top, 0, canvas.height / DPR);
-        state.box.x = Math.round(Math.min(state.drawStart.x, x));
-        state.box.y = Math.round(Math.min(state.drawStart.y, y));
-        state.box.w = Math.round(Math.abs(x - state.box.x));
-        state.box.h = Math.round(Math.abs(y - state.box.y));
-        syncBoxInputs();
-        render(false);
-      });
-      window.addEventListener('mouseup', () => { if (state.isDrawing) state.isDrawing = false; });
-
-      // Inputs
-      overlayText.addEventListener('input', () => render(false));
-      fontSizeEl.addEventListener('input', () => render(false));
-      lineHeightEl.addEventListener('input', () => render(false));
-      fontFamilyEl.addEventListener('input', () => render(false));
-
-      [boxXEl, boxYEl, boxWEl, boxHEl].forEach(el => el.addEventListener('change', updateBoxFromInputs));
-      centerBoxBtn.addEventListener('click', (e) => { e.preventDefault(); centerBox(); });
-      resetBoxBtn.addEventListener('click', (e) => { e.preventDefault(); setDefaultBox(); render(false); });
-
-      downloadBtn.addEventListener('click', (e) => { e.preventDefault(); downloadPNG(); });
-      copyBtn.addEventListener('click', (e) => { e.preventDefault(); copyToClipboard(); });
-
-      // Keyboard shortcuts
-      window.addEventListener('keydown', (e) => {
-        if (e.key.toLowerCase() === 'r') { setDefaultBox(); render(false); }
-      });
-
-      // On load, size canvas to comfortable preview size
-      function init() {
-        fitStageToImage();
-        render(false);
-        window.addEventListener('resize', () => {
-          if (!state.image) { fitStageToImage(); render(false); return; }
-          // Keep same image-space size but adjust CSS-scale on resize
-          fitStageToImage();
-          render(false);
-        });
+      // ===== Export (render at original resolution) =====
+      function drawToExportCanvas() {
+        if (!state.img) { console.warn('[drawToExportCanvas] no image'); alert('Please load an image first.'); return null; }
+        const off = document.createElement('canvas');
+        off.width = state.imgW; off.height = state.imgH;
+        const octx = off.getContext('2d');
+        // Image
+        octx.drawImage(state.img, 0, 0);
+        // Scale factors from CSS canvas -> intrinsic image space
+        const kx = state.imgW / state.canW; const ky = state.imgH / state.canH;
+        const box = { x: Math.round(state.box.x * kx), y: Math.round(state.box.y * ky), w: Math.round(state.box.w * kx), h: Math.round(state.box.h * ky) };
+        const fontCss = +fontSizeEl.value || 48; const fontPx = Math.round(fontCss * kx); // scale by width factor
+        console.log('[drawToExportCanvas]', { kx, ky, exportBox: box, fontPx });
+        drawTextIntoBox(octx, box, state.imgW, state.imgH, fontPx, false);
+        return off;
       }
+      function downloadPNG() {
+        const off = drawToExportCanvas(); if (!off) return;
+        const link = document.createElement('a'); link.download = 'image-with-text.png'; link.href = off.toDataURL('image/png'); link.click();
+        console.log('[downloadPNG] triggered');
+      }
+      function copyToClipboard() {
+        const off = drawToExportCanvas(); if (!off) return;
+        off.toBlob(async (blob) => {
+          try { const item = new ClipboardItem({ 'image/png': blob }); await navigator.clipboard.write([item]); console.log('[copyToClipboard] success', blob && blob.size); alert('Rendered image copied to clipboard.'); }
+          catch(err){ console.error('[copyToClipboard] failed', err); alert('Copy failed in this browser. You can still download as PNG.'); }
+        }, 'image/png');
+      }
+
+      // ===== Controls =====
+      overlayText.addEventListener('input', () => { console.log('[overlayText.input] length', overlayText.value.length); render(false); });
+      fontSizeEl.addEventListener('input', () => { console.log('[fontSize.input]', fontSizeEl.value); render(false); });
+      downloadBtn.addEventListener('click', (e)=>{ e.preventDefault(); downloadPNG(); });
+      copyBtn.addEventListener('click', (e)=>{ e.preventDefault(); copyToClipboard(); });
+      resetBtn.addEventListener('click', (e)=>{ e.preventDefault(); setDefaultBox(); });
+      centerBtn.addEventListener('click', (e)=>{ e.preventDefault(); centerBox(); });
+
+      // ===== Init & resize =====
+      function init(){ console.log('[init] start'); fitStageToImage(); render(false); window.addEventListener('resize', () => { console.log('[window.resize]', { stageW: stage.clientWidth, winH: window.innerHeight }); fitStageToImage(); render(false); }); }
       init();
     })();
   </script>
